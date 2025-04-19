@@ -1,0 +1,1 @@
+mülk sahibi zazadır(TyRox)
