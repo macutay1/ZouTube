@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Local Network Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #chat-box {
+            height: 500px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+        #peer-list {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local Network Chat</h1>
+    <div id="peer-list"></div>
+    <div id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="Mesajınız...">
+    <input type="file" id="file-input">
+    <button onclick="sendMessage()">Gönder</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+    <script>
+        // PeerJS konfigürasyonu
+        const peer = new Peer({
+            host: location.hostname,
+            port: 9000,
+            path: '/chat'
+        });
+
+        let currentConnection = null;
+        const messages = JSON.parse(localStorage.getItem('chat_messages')) || [];
+
+        // PeerJS olayları
+        peer.on('open', (id) => {
+            displayMessage(`Sistem: Sizin ID'niz: ${id}`);
+            updatePeerList();
+        });
+
+        peer.on('connection', (conn) => {
+            setupConnection(conn);
+        });
+
+        // Mesaj gönderme fonksiyonu
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if(message && currentConnection) {
+                const msg = {
+                    type: 'text',
+                    data: message,
+                    timestamp: new Date().toISOString()
+                };
+                currentConnection.send(msg);
+                displayMessage(`Siz: ${message}`);
+                saveMessage(msg);
+                input.value = '';
+            }
+        }
+
+        // Dosya gönderme işlemi
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file && currentConnection) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const msg = {
+                        type: 'file',
+                        data: reader.result,
+                        filename: file.name,
+                        timestamp: new Date().toISOString()
+                    };
+                    currentConnection.send(msg);
+                    displayMessage(`Siz: ${file.name} gönderildi`);
+                    saveMessage(msg);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Bağlantı kurma fonksiyonu
+        function connectToPeer(peerId) {
+            const conn = peer.connect(peerId);
+            setupConnection(conn);
+        }
+
+        // Bağlantı ayarları
+        function setupConnection(conn) {
+            conn.on('data', (data) => {
+                displayMessage(`${conn.peer}: ${data.type === 'file' ? data.filename : data.data}`);
+                saveMessage(data);
+                
+                if(data.type === 'file') {
+                    const link = document.createElement('a');
+                    link.href = data.data;
+                    link.download = data.filename;
+                    link.textContent = `İndir: ${data.filename}`;
+                    document.getElementById('chat-box').appendChild(link);
+                }
+            });
+
+            currentConnection = conn;
+        }
+
+        // Mesaj görüntüleme
+        function displayMessage(message) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.textContent = message;
+            document.getElementById('chat-box').appendChild(div);
+        }
+
+        // Yerel depolamaya kaydetme
+        function saveMessage(msg) {
+            messages.push(msg);
+            localStorage.setItem('chat_messages', JSON.stringify(messages));
+        }
+
+        // Peer listesini güncelleme
+        function updatePeerList() {
+            fetch(`http://${location.hostname}:9000/chat/peers`)
+                .then(response => response.json())
+                .then(peers => {
+                    const peerList = document.getElementById('peer-list');
+                    peerList.innerHTML = '<h3>Bağlı Kullanıcılar:</h3>';
+                    peers.forEach(peerId => {
+                        if(peerId !== peer.id) {
+                            const button = document.createElement('button');
+                            button.textContent = peerId;
+                            button.onclick = () => connectToPeer(peerId);
+                            peerList.appendChild(button);
+                        }
+                    });
+                });
+        }
+
+        // Geçmiş mesajları yükle
+        messages.forEach(msg => {
+            displayMessage(`${msg.timestamp}: ${msg.data}`);
+        });
+    </script>
+</body>
+</html>
