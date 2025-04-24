@@ -2,698 +2,172 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZouTube - Modern Video Platformu</title>
+    <title>Online Chat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <style>
-        :root {
-            --primary-color: #6a11cb;
-            --secondary-color: #2575fc;
-            --text-color: #f8f9fa;
-            --bg-color: #121212;
-            --bg-secondary: #1e1e1e;
-            --card-bg: #252525;
+        #messages {
+            height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        .message-card {
+            margin-bottom: 15px;
+            max-width: 80%;
+            word-break: break-word;
         }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 2rem;
-            background: linear-gradient(-45deg, var(--primary-color), var(--secondary-color));
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .logo i {
-            margin-right: 0.8rem;
-            font-size: 2rem;
-        }
-
-        .upload-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .upload-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .upload-btn i {
-            margin-right: 0.5rem;
-        }
-
-        main {
-            padding: 2rem;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .video-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .thumbnail-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            height: 0;
-            overflow: hidden;
-        }
-
-        .thumbnail-container img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .video-card:hover .thumbnail-container img {
-            transform: scale(1.05);
-        }
-
-        .play-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .video-card:hover .play-overlay {
-            opacity: 1;
-        }
-
-        .play-icon {
-            background-color: rgba(255, 255, 255, 0.8);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--primary-color);
-            font-size: 2rem;
-        }
-
-        .video-info {
-            padding: 1.2rem;
-        }
-
-        .video-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .video-meta {
-            display: flex;
-            justify-content: space-between;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-
-        .video-duration {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        .video-player-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .video-player-container.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .video-player {
-            width: 80%;
-            max-width: 1200px;
-            position: relative;
-        }
-
-        .video-player video {
-            width: 100%;
-            border-radius: 8px;
-        }
-
-        .close-player {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-        }
-
-        .upload-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .upload-modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .upload-form {
-            background-color: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .upload-form h2 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 0.8rem;
-            background-color: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: var(--text-color);
-            font-size: 1rem;
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .file-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            border: 2px dashed #444;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-
-        .file-upload:hover {
-            border-color: var(--primary-color);
-        }
-
-        .file-upload i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .file-upload input {
-            display: none;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        .form-actions button {
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .cancel-btn {
-            background-color: transparent;
-            border: 1px solid #666;
-            color: var(--text-color);
-        }
-
-        .cancel-btn:hover {
-            background-color: #333;
-        }
-
-        .submit-btn {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            border: none;
-            color: white;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
-        }
-
-        @media (max-width: 768px) {
-            header {
-                padding: 1rem;
-            }
-            
-            .logo {
-                font-size: 1.5rem;
-            }
-            
-            .upload-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            main {
-                padding: 1rem;
-            }
-            
-            .video-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 1rem;
-            }
-            
-            .video-player {
-                width: 95%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .video-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .upload-form {
-                padding: 1.5rem;
-            }
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
         }
     </style>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="material-icons">play_circle_filled</i>
-            <span>ZouTube</span>
+    <div class="container">
+        <!-- Giriş Ekranı -->
+        <div id="loginScreen" class="box" style="margin-top: 50px; max-width: 400px;">
+            <h1 class="title">Chat Odasına Giriş</h1>
+            <div class="field">
+                <input id="username" class="input" type="text" placeholder="Kullanıcı Adı">
+            </div>
+            <button onclick="login()" class="button is-primary">Giriş Yap</button>
         </div>
-        <button class="upload-btn" id="openUploadModal">
-            <i class="material-icons">cloud_upload</i>
-            <span>Yükle</span>
-        </button>
-    </header>
 
-    <main>
-        <h1>Son Eklenen Videolar</h1>
-        <div class="video-grid" id="videoGrid">
-            <!-- Videolar buraya dinamik olarak eklenecek -->
-        </div>
-    </main>
+        <!-- Chat Ekranı -->
+        <div id="chatScreen" style="display: none;">
+            <nav class="navbar is-primary">
+                <div class="navbar-brand">
+                    <div class="navbar-item">
+                        <h1 class="title has-text-white">Online Chat</h1>
+                    </div>
+                </div>
+            </nav>
 
-    <!-- Video Oynatıcı Modalı -->
-    <div class="video-player-container" id="videoPlayerContainer">
-        <div class="video-player">
-            <button class="close-player" id="closePlayer">
-                <i class="material-icons">close</i>
-            </button>
-            <video controls id="mainVideoPlayer"></video>
+            <div id="messages"></div>
+
+            <div class="field has-addons" style="padding: 20px;">
+                <div class="control is-expanded">
+                    <input id="messageInput" class="input" type="text" placeholder="Mesajınız...">
+                </div>
+                <div class="control">
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                    <button onclick="document.getElementById('fileInput').click()" class="button is-info">
+                        📷
+                    </button>
+                </div>
+                <div class="control">
+                    <button onclick="sendMessage()" class="button is-success">Gönder</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Video Yükleme Modalı -->
-    <div class="upload-modal" id="uploadModal">
-        <div class="upload-form">
-            <h2>Yeni Video Yükle</h2>
-            <form id="videoUploadForm">
-                <div class="form-group">
-                    <label for="videoTitle">Video Başlığı</label>
-                    <input type="text" id="videoTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="videoDescription">Açıklama (Opsiyonel)</label>
-                    <textarea id="videoDescription"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Video Dosyası</label>
-                    <div class="file-upload" id="fileUploadArea">
-                        <i class="material-icons">upload</i>
-                        <span>Dosyayı sürükleyip bırakın veya tıklayın</span>
-                        <input type="file" id="videoFile" accept="video/*" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Thumbnail (Opsiyonel)</label>
-                    <div class="file-upload" id="thumbnailUploadArea">
-                        <i class="material-icons">image</i>
-                        <span>Thumbnail yükleyin (1280x720 önerilir)</span>
-                        <input type="file" id="thumbnailFile" accept="image/*">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="cancel-btn" id="cancelUpload">İptal</button>
-                    <button type="submit" class="submit-btn">Yükle</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Firebase ve UI -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
     <script>
-        // Video verileri - ÖRNEK VİDEOLAR EKLENDİ
-        const videoData = [
-            {
-                id: 1,
-                title: "anime1",
-                description: "ZouTube anime",
-                videoUrl: "videos/sample1.mp4",
-                thumbnailUrl: "thumbnails/sample1.jpg",
-                duration: "1:23",
-                views: "1.2K",
-                date: "3 gün önce"
-            },
-            {
-                id: 2,
-                title: "anime2",
-                description: "anime2",
-                videoUrl: "videos/sample2.mp4",
-                thumbnailUrl: "thumbnails/sample2.jpg",
-                duration: "0:45",
-                views: "856",
-                date: "1 hafta önce"
-            },
-            {
-                id: 3,
-                title: "anime3",
-                description: "anime3",
-                videoUrl: "videos/sample3.mp4",
-                thumbnailUrl: "thumbnails/sample3.jpg",
-                duration: "2:15",
-                views: "3.4K",
-                date: "2 hafta önce"
-            },
-              {
-                id: 4,
-                title: "anime4",
-                description: "anime4",
-                videoUrl: "videos/sample4.mp4",
-                thumbnailUrl: "thumbnails/sample4.jpg",
-                duration: "2:15",
-                views: "3.9K",
-                date: "2.5 hafta önce"
-             },
-              {
-                id: 5,
-                title: "anime5",
-                description: "anime5",
-                videoUrl: "videos/sample5.mp4",
-                thumbnailUrl: "thumbnails/sample5.jpg",
-                duration: "2:15",
-                views: "5.4K",
-                date: "3 hafta önce"
-            },
-              {
-                id: 6,
-                title: "anime6",
-                description: "anime6",
-                videoUrl: "videos/sample6.mp4",
-                thumbnailUrl: "thumbnails/sample6.jpg",
-                duration: "2:15",
-                views: "9.4K",
-                date: "4 hafta önce"
-            },
-              {
-                id: 7,
-                title: "anime7",
-                description: "anime8",
-                videoUrl: "videos/sample7.mp4",
-                thumbnailUrl: "thumbnails/sample7.jpg",
-                duration: "2:15",
-                views: "3.9K",
-                date: "2 hafta önce"
-            },
-              {
-                id: 8,
-                title: "anime8",
-                description: "anime8",
-                videoUrl: "videos/sample8.mp4",
-                thumbnailUrl: "thumbnails/sample8.jpg",
-                duration: "2:15",
-                views: "7.4K",
-                date: "3 hafta önce"
-            },
-        ];
+        // Firebase konfigürasyonu
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        // DOM Elementleri
-        const videoGrid = document.getElementById('videoGrid');
-        const videoPlayerContainer = document.getElementById('videoPlayerContainer');
-        const mainVideoPlayer = document.getElementById('mainVideoPlayer');
-        const closePlayer = document.getElementById('closePlayer');
-        const uploadModal = document.getElementById('uploadModal');
-        const openUploadModal = document.getElementById('openUploadModal');
-        const cancelUpload = document.getElementById('cancelUpload');
-        const videoUploadForm = document.getElementById('videoUploadForm');
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const videoFileInput = document.getElementById('videoFile');
-        const thumbnailUploadArea = document.getElementById('thumbnailUploadArea');
-        const thumbnailFileInput = document.getElementById('thumbnailFile');
+        // Firebase başlatma
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
 
-        // Videoları grid'e yükle
-        function loadVideos() {
-            videoGrid.innerHTML = '';
-            videoData.forEach(video => {
-                const videoCard = document.createElement('div');
-                videoCard.className = 'video-card';
-                videoCard.dataset.id = video.id;
+        let currentUser = null;
+
+        // Giriş işlemi
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            if(username) {
+                currentUser = username;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('chatScreen').style.display = 'block';
+                loadMessages();
+            }
+        }
+
+        // Mesaj gönderme
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if(message) {
+                const newMessage = {
+                    text: message,
+                    user: currentUser,
+                    timestamp: Date.now()
+                };
                 
-                videoCard.innerHTML = `
-                    <div class="thumbnail-container">
-                        <img src="${video.thumbnailUrl}" alt="${video.title}" onerror="this.src='thumbnails/default.jpg'">
-                        <div class="play-overlay">
-                            <div class="play-icon">
-                                <i class="material-icons">play_arrow</i>
-                            </div>
-                        </div>
-                        <div class="video-duration">${video.duration}</div>
-                    </div>
-                    <div class="video-info">
-                        <h3 class="video-title">${video.title}</h3>
-                        <div class="video-meta">
-                            <span>${video.views} görüntüleme</span>
-                            <span>${video.date}</span>
-                        </div>
-                    </div>
-                `;
-                
-                videoCard.addEventListener('click', () => playVideo(video));
-                videoGrid.appendChild(videoCard);
+                database.ref('messages').push(newMessage);
+                messageInput.value = '';
+            }
+        }
+
+        // Dosya yükleme
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const storageRef = storage.ref(`images/${file.name}`);
+                storageRef.put(file).then((snapshot) => {
+                    snapshot.ref.getDownloadURL().then((url) => {
+                        const newMessage = {
+                            image: url,
+                            user: currentUser,
+                            timestamp: Date.now()
+                        };
+                        database.ref('messages').push(newMessage);
+                    });
+                });
+            }
+        });
+
+        // Mesajları dinleme
+        function loadMessages() {
+            database.ref('messages').on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                displayMessage(message);
             });
         }
 
-        // Video oynatma fonksiyonu
-        function playVideo(video) {
-            mainVideoPlayer.src = video.videoUrl;
-            mainVideoPlayer.poster = video.thumbnailUrl;
-            videoPlayerContainer.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+        // Mesajları gösterme
+        function displayMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message-card';
 
-        // Video yükleme modalını aç
-        function openModal() {
-            uploadModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Modal kapatma fonksiyonu
-        function closeModal() {
-            videoPlayerContainer.classList.remove('active');
-            uploadModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Yeni video ekleme fonksiyonu
-        function addNewVideo(title, description, videoUrl, thumbnailUrl) {
-            const newVideo = {
-                id: videoData.length + 1,
-                title: title,
-                description: description,
-                videoUrl: videoUrl,
-                thumbnailUrl: thumbnailUrl || 'thumbnails/default.jpg',
-                duration: '0:00',
-                views: "0",
-                date: 'şimdi'
-            };
-            
-            videoData.unshift(newVideo);
-            loadVideos();
-        }
-
-        // Dosya yükleme alanı etkileşimleri
-        fileUploadArea.addEventListener('click', () => videoFileInput.click());
-        thumbnailUploadArea.addEventListener('click', () => thumbnailFileInput.click());
-
-        videoFileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                fileUploadArea.innerHTML = `
-                    <i class="material-icons">check_circle</i>
-                    <span>${this.files[0].name}</span>
+            let content = '';
+            if(message.text) {
+                content = `
+                    <div class="box">
+                        <strong>${message.user}</strong>
+                        <span class="timestamp">${new Date(message.timestamp).toLocaleString()}</span>
+                        <p>${message.text}</p>
+                    </div>
+                `;
+            } else if(message.image) {
+                content = `
+                    <div class="box">
+                        <strong>${message.user}</strong>
+                        <span class="timestamp">${new Date(message.timestamp).toLocaleString()}</span>
+                        <img src="${message.image}" style="max-width: 300px; margin-top: 10px;">
+                    </div>
                 `;
             }
-        });
 
-        thumbnailFileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                thumbnailUploadArea.innerHTML = `
-                    <i class="material-icons">check_circle</i>
-                    <span>${this.files[0].name}</span>
-                `;
-            }
-        });
-
-        // Form gönderimi
-        videoUploadForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('videoTitle').value;
-            const description = document.getElementById('videoDescription').value;
-            const videoFile = videoFileInput.files[0];
-            
-            if (!videoFile) return;
-            
-            // Gerçek uygulamada burada dosya sunucuya yüklenir
-            // Bu örnekte sadece local URL oluşturuyoruz
-            const videoUrl = URL.createObjectURL(videoFile);
-            
-            let thumbnailUrl = 'thumbnails/default.jpg';
-            if (thumbnailFileInput.files.length > 0) {
-                thumbnailUrl = URL.createObjectURL(thumbnailFileInput.files[0]);
-            }
-            
-            addNewVideo(title, description, videoUrl, thumbnailUrl);
-            closeModal();
-            this.reset();
-            
-            // Yükleme alanlarını resetle
-            fileUploadArea.innerHTML = `
-                <i class="material-icons">upload</i>
-                <span>Dosyayı sürükleyip bırakın veya tıklayın</span>
-            `;
-            
-            thumbnailUploadArea.innerHTML = `
-                <i class="material-icons">image</i>
-                <span>Thumbnail yükleyin (1280x720 önerilir)</span>
-            `;
-        });
-
-        // Event listeners
-        closePlayer.addEventListener('click', closeModal);
-        openUploadModal.addEventListener('click', openModal);
-        cancelUpload.addEventListener('click', closeModal);
-
-        // Sayfa yüklendiğinde videoları yükle
-        document.addEventListener('DOMContentLoaded', loadVideos);
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
     </script>
 </body>
 </html>
